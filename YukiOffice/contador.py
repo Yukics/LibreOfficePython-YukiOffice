@@ -1,6 +1,7 @@
 ﻿import socket  
 import uno
 
+#Extrae el numero de factura
 def sacar_cfg():
     config=[]
     with open ('config.txt', 'rt') as archivo_config:  # Abre config.txt en modo lectura
@@ -10,6 +11,7 @@ def sacar_cfg():
     contador=(contador[config[0].find('=')+1:len(config[0])]).strip()  #Saca el numero contador para los albaranes y facturas
     return contador
 
+#Añade 1 al numero de factura
 def anadir_uno_contador (contador):
     with open('config.txt', 'rt') as archivo_config:  # Abre config.txt en modo lectura
         filedata = archivo_config.read() #Vuelca el archivo en filedata
@@ -19,17 +21,12 @@ def anadir_uno_contador (contador):
         archivo_config.write(filedata) #Sobreescribe el archivo de cfg
 
 localContext = uno.getComponentContext()
-
 resolver = localContext.ServiceManager.createInstanceWithContext(
 				"com.sun.star.bridge.UnoUrlResolver", localContext )
-
 ctx = resolver.resolve( "uno:socket,host=localhost,port=2002;urp;StarOffice.ComponentContext" )
 smgr = ctx.ServiceManager
-
 desktop = smgr.createInstanceWithContext( "com.sun.star.frame.Desktop",ctx)
-
 model = desktop.getCurrentComponent()
-
 active_sheet = model.CurrentController.ActiveSheet
 
 cell1 = active_sheet.getCellRangeByName("D6")
