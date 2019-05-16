@@ -1,8 +1,18 @@
+'''Primero de todo, este programa lo he hecho para que funcione de la forma mas eficiente posible, 
+por ello no he utilizado ni objetos ni nada ademas asi es mas facil a la hora de leer y entender 
+sobretodo si no estas acostumbrado a leer codigo.
+
+
+GNU GPL 3.0 '''
+
+
 #Libreria de interfaz gráfica
 import tkinter as tk
 from tkinter.filedialog import askopenfilename
+
 #Librerias de sistema
 import os, time
+
 #Libreria que permite paralelizar procesos
 from threading import Thread
 
@@ -33,12 +43,23 @@ def abrir_albaran():
 def abrir_factura():
     os.system('start soffice --accept="socket,host=localhost,port=2002;urp;" "macro://Sin título 1/Standard.AplicarIVA.IVA" "Plantilla\\PlantillaFactura.ots"')
 
-#Suma 1 al contador cada vez que se ejecuta del documento config.txt
+#Se jecuta contador.py
 def anadir_numero():
     time.sleep(10)
-    os.system('"C:\\Program Files\\LibreOffice\\program\\python" contador.py')
+    ruta=[]
+    # Abre config.txt en modo lectura
+    with open ('config.txt', 'rt') as configtxt:
+        for line in configtxt:
+            ruta.append(line)
+    contador = ruta[1]
+    contador=(contador[ruta[1].find('=')+1:len(ruta[1])]).strip()
+    contador = '"'+contador + "\\\\python" + '"' + " contador.py"
+    #Ruta donde se encuentra el python del LibreOffice con el modulo uno incorporado
+    os.system(contador)
 
-#Abre la ventana específica de creación de facturas
+
+
+#Abre la ventana específica de creación de facturas, tres cuartos de lo mismo que la principal
 def ventana_factura():
     window = tk.Toplevel(root)
     window.title("YukiOffice/Factura")
@@ -59,52 +80,71 @@ def ventana_factura():
     button6.configure(width=250, height=175)
     button6.image = photo6
 
-#Extrae el nombre del archivo de una ruta completa
+#Extrae el nombre del archivo de una ruta completa, esto existe por culpa de la ejecución de la macro de la hoja de calculo que aplica el IVA
 def extraer_nombre(ruta):
     longitud = len(ruta)-4
     contador = longitud
     while ruta[contador] != "/":
         contador -= 1
     nombre = ruta[contador+1:longitud]
-    print(nombre)
     return nombre
 
 #Permite seleccionar el albarán del cual hacer factura
 def factura_desde_albaran():
-    def OpenFile():
-        name = askopenfilename(initialdir="C:/Users",
-                               filetypes=(("Office Document Sheet", "*.ods"), ("All Files", "*.*")),
-                               title="Elige un albarán."
-                               )
-        ejecutar_albaran_a_factura = 'start soffice --accept="socket,host=localhost,port=2002;urp;" "%s" ' % name
-        # Using try in case user types in unknown file or closes without choosing a file.
-        archivo = extraer_nombre(name)
-        macro = 'macro://%s/Standard.AplicarIVA.IVA' % archivo
-        print(macro)
-        ejecutar_macro = 'start soffice "%s"' % macro
-        try:
-            os.system(ejecutar_albaran_a_factura)
-            Thread(target=anadir_numero).start()
-            time.sleep(6)
-            Thread(target=os.system(ejecutar_macro)).start()
-        except:
-            print("No file exists")
 
-    OpenFile()
+    name = askopenfilename(initialdir="C:/Users", filetypes=(("Hoja de cálculo de LibreOffice", "*.ods"), ("All Files", "*.*")), title="Elige un albarán.")                               
+   	
+   	#Comprueba la extensión del archivo
+    ext = name[len(name)-3:len(name)]
+    if ext != "ods" and ext != "ots" and ext != "xls" and ext != "xlt" and name != "":
+    	os.system('start msgbox.vbs')
+
+
+    #El comando con la ruta del archivo que se quiere convertir a factura
+    ejecutar_albaran_a_factura = 'start soffice --accept="socket,host=localhost,port=2002;urp;" "%s" ' % name
+    
+    #Saca el nombre del archivo de la ruta entera para usarlo en la macro 
+    archivo = extraer_nombre(name)
+    macro = 'macro://%s/Standard.AplicarIVA.IVA' % archivo
+ 	
+ 	#La ejecucion de la macro como tal
+    ejecutar_macro = 'start soffice "%s"' % macro
+    
+    #Intenta ejecutar el comando y en caso de error muestra una ventana de error (solo se muestra en caso de que no se pueda ejecutar por que se es muy inutil)
+    try:
+        os.system(ejecutar_albaran_a_factura)
+        Thread(target=anadir_numero).start()
+        time.sleep(6)
+        Thread(target=os.system(ejecutar_macro)).start()
+    except:
+    	print("Ha habido un error")     
 
 #Programa principal, genera la interfaz gráfica
 if __name__ == "__main__":
     root = tk.Tk()
+   	
+   	#El icono que aparece arriba a la izquierda de la ventana
     root.wm_iconbitmap(default='icono.ico')
+    
+    #Se crea un frame, como un lugar donde poner cosas la agenda y la plantilla de texto
     frame1 = tk.Frame(root)
     frame1.pack(side=tk.TOP, fill=tk.X)
+    
+    #Se crea un frame, para el boton de la plantilla del albaran y factruas
     frame2 = tk.Frame(root)
     frame2.pack(side=tk.BOTTOM, fill=tk.X)
+    
+    #Titulo de la ventana y el programa
     root.title("YukiOffice")
+    
+    #Tamaño de la ventana en pixeles
     root.geometry("500x350")
     root.configure(background="black")
+    
+    #Que no se pueda modificar el tamaño de la ventana, hacerlo de la otra forma no merecia la pena
     root.resizable(0, 0)
 
+    #Cada uno de los botones de la interfaz principal
     photo1 = tk.PhotoImage(file="image10.png")
     button1 = tk.Button(frame1, width=250, height=175, image=photo1, command=abrir_plantilla_proceso)
     button1.pack(side=tk.LEFT, padx=2, pady=2)
