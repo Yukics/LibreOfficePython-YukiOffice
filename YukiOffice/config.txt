@@ -1,5 +1,0 @@
-cuenta_factura = 0
-ruta_LibreOffice = C:\\Program Files\\LibreOffice\\program
-
-Se debe dejar un espacio detras del simbolo de igual, y la ruta de donde esta el programa de libre office debe presentarse con la estructura del ejemplo \ x 8 y la letra del disco duro en mayuscula acompañado de :
-Tanto la linea de la cuenta de la factura como la de la ruta de libre office deben permanecer como la primer y segunda linea respectivamente
